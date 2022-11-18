@@ -46,7 +46,7 @@ key.py       测试文件，通过按键控制播放和暂停音频传输
 
 启动hk_trans节点
 
-话题为/voice，数据类型为std_msgs::UInt8
+话题为/voice，数据类型为std_msgs::UInt8  
 停止播放：'0'
 播放音频文件：'1'~'4'
 
