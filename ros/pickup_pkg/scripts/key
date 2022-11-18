@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+import rospy
+
+from std_msgs.msg import UInt8
+
+import sys, select, termios, tty
+
+msg = """
+1:back;
+2:move;
+3:stop;
+0:end trans;
+"""
+
+mode = {1,2,3,0}
+
+def getKey():
+    tty.setraw(sys.stdin.fileno())
+    rlist, _, _ = select.select([sys.stdin], [], [], 0.1)
+    if rlist:
+        key = sys.stdin.read(1)
+    else:
+        key = ''
+
+    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
+    return key
+
+
+
+
+if __name__=="__main__":
+    settings = termios.tcgetattr(sys.stdin)
+    
+    rospy.init_node('teleop')
+    pub = rospy.Publisher('voice', UInt8, queue_size=5)
+
+   
+    try:
+        print(msg)
+
+        while(1):
+            key = getKey()
+            if key != '':
+                if(key == '\x03'):
+                    break
+                
+                switch = UInt8()
+                if key == '1':
+                    switch.data = 1
+                elif key == '0':
+                    switch.data = 0
+                elif key == '2':
+                    switch.data = 2
+                elif key == '3':
+                    switch.data = 3 
+                print(switch)                                       
+                pub.publish(switch)
+            #print("loop: {0}".format(count))
+            #print("target: vx: {0}, wz: {1}".format(target_speed, target_turn))
+            #print("publihsed: vx: {0}, wz: {1}".format(twist.linear.x, twist.angular.z))
+
+    except Exception as e:
+        print(e)
+
+    finally:
+        switch = UInt8()
+        switch.data = 0
+        pub.publish(switch)
+
+    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, settings)
+
